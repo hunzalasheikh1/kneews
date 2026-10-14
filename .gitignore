@@ -1,0 +1,22 @@
+.venv*/
+.build/
+data/
+models/
+artifacts/
+.env
+__pycache__/
+.pytest_cache/
+node_modules/
+.next/
+*.log
+.DS_Store
+# code-only repository: no docs, reports, slides, archives or report pack
+*.md
+*.pdf
+*.pptx
+*.zip
+docs/
+references/
+Mid-Report/
+*.tsbuildinfo
+next-env.d.ts

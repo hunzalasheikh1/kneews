@@ -1,0 +1,11 @@
+'use client';
+import {useEffect,useState} from 'react';
+import {getJSON} from '../lib/api';
+type History={total:number;items:{id:string;finding:string;state:string;evidence:string;reviewer:string;note:string;created_at:string}[]};
+
+export function ReviewHistory({studyId,labelId}:{studyId:string;labelId?:string}){
+ const [history,setHistory]=useState<History|null>(null),[offset,setOffset]=useState(0),[error,setError]=useState('');
+ useEffect(()=>{setOffset(0)},[studyId,labelId]);
+ useEffect(()=>{let active=true;setHistory(null);async function load(){try{const params=new URLSearchParams({offset:String(offset),limit:'30'});if(labelId)params.set('label_set_id',labelId);const data=await getJSON<History>(`/studies/${encodeURIComponent(studyId)}/reviews?${params}`);if(active){setHistory(data);setError('')}}catch(e){if(active)setError((e as Error).message)}}load();const timer=setInterval(load,5000);return()=>{active=false;clearInterval(timer)}},[studyId,labelId,offset]);
+ return <section className="panel"><div className="section-title"><div><h2>Review history</h2><p>{labelId?'For the selected label source. ':'All source reviews. '}Latest decisions determine agreement; earlier revisions remain visible.</p></div></div>{error&&<div className="alert error" role="alert">{error}</div>}{history?.items.length?<><div className="table-wrap"><table><thead><tr><th>REVIEWER / TIME</th><th>FINDING</th><th>STATE</th><th>SOURCE EVIDENCE</th></tr></thead><tbody>{history.items.map(r=><tr key={r.id}><td>{r.reviewer}<p>{new Date(r.created_at).toLocaleString()}</p></td><td>{r.finding}</td><td><span className={'state '+r.state}>{r.state}</span></td><td>{r.evidence||'No quoted evidence'}{r.note&&<details><summary>Review note</summary><p>{r.note}</p></details>}</td></tr>)}</tbody></table></div><div className="pager"><button disabled={!offset} onClick={()=>setOffset(Math.max(0,offset-30))}>Previous</button><span>{offset+1}–{Math.min(offset+30,history.total)} of {history.total}</span><button disabled={offset+30>=history.total} onClick={()=>setOffset(offset+30)}>Next</button></div></>:<div className="empty">{history?'No saved reviews for this selection.':'Loading review history…'}</div>}<p className="panel-note">Names alone do not establish reviewer expertise or independent work.</p></section>
+}
