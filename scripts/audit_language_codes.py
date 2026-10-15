@@ -20,5 +20,4 @@ print(f"{sum(r['needs_review'] for r in rows)} of {len(rows)} codes need human r
 if args.csv:
     with open(args.csv,'w',newline='') as f:
         w=csv.writer(f);w.writerow(['code','reports','needs_review','reasons'])
-        w.byte = None
         w.writerows([[r['code'],r['reports'],r['needs_review'],'; '.join(r['reasons'])] for r in rows])
